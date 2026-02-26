@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Ferramentaria Elétrica CA — Vale</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"/>
+<style>
+  :root{
+  --vale-green:#1E6E43;
+  --vale-teal:#3BA99C;
+  --vale-blue:#0B4D91;
+  --vale-dark:#0F3D2E;
+  --vale-bg:#f6f7fb;
+  --text:#0f172a;
+  --muted:#64748b;
+  --card-shadow: 0 8px 24px rgba(15,23,36,0.06);
+}
+  html,body{height:100%;}
+  body { background: var(--vale-bg); color:var(--vale-dark); font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  .vale-header { background: linear-gradient(90deg, var(--vale-green), var(--vale-teal)); color:#fff; padding:18px 0; box-shadow: 0 4px 18px rgba(0,0,0,0.08); }
+  .vale-header .brand { display:flex; align-items:center; gap:1rem; }
+  .vale-header img.logo { height:40px; width:auto; object-fit:contain; border-radius:6px; background:rgba(255,255,255,0.06); padding:4px; }
+  #brandTitle { font-weight:700; font-size:1.15rem; letter-spacing:0.2px; }
+  .site-tag { opacity:0.95; font-size:0.9rem; }
+  .app-bar { background:#fff; border-bottom:1px solid #e6eef0; position:sticky; top:0; z-index:40; }
+  .app-title { color: var(--vale-dark); font-weight:600; }
+  .card { box-shadow: var(--card-shadow); border:0; border-radius:12px; background:#fff; }
+  .tool-photo { width:72px; height:72px; object-fit:cover; border-radius:10px; }
+  .status-badge { font-size:.75rem; }
+  .holder-highlight { border: 2px solid rgba(59,169,156,0.15); box-shadow: 0 6px 18px rgba(59,169,156,0.06); }
+  .tool-card .card-body { padding:16px; }
+  .tool-meta { min-width:0; }
+  .qr-print { page-break-inside: avoid; display:inline-block; margin:8px; padding:12px; border:1px dashed #cbd5e1; border-radius:8px; text-align:center; background:#fff; }
+  .vale-footer { color:#475569; font-size:.9rem; }
+  .small-muted { color:var(--muted); font-size:0.9rem; }
+  .btn-outline-primary[disabled] { opacity:0.45; pointer-events:none; }
+  @media (max-width:767px){ .container { padding-left:12px; padding-right:12px; } .vale-header img.logo { height:34px; } .tool-photo { width:56px; height:56px; } }
+
+  /* ---- dashboard stability fixes ---- */
+  .card canvas { height: 220px !important; max-height: 220px; display: block; }
+  .card .card-body, .card.p-3 { min-height: 240px; }
+  canvas { touch-action: none; -webkit-tap-highlight-color: transparent; }
+  canvas:focus { outline: none; }
+  #dashboardPhotoGallery img { display:block; width:100%; height:80px; object-fit:cover; }
+  html, body { scroll-behavior: auto !important; }
+  /* prevent unexpected scroll when modal opens */
+  .modal { -webkit-overflow-scrolling: auto; }
+
+  /* SCAN FEEDBACK */
+  .scan-success-flash { position: relative; box-shadow: 0 0 0 rgba(0,0,0,0); transition: box-shadow 220ms ease-out, transform 200ms ease-out; }
+  .scan-success-flash.flash { box-shadow: 0 0 24px rgba(46, 204, 113, 0.95); transform: scale(1.01); }
+
+/* --- Dashboard polish --- */
+.hoverable{ transition: transform .12s ease, box-shadow .12s ease; }
+.hoverable:hover{ transform: translateY(-1px); box-shadow: 0 .35rem 1rem rgba(0,0,0,.08); }
+
+.kpi-card{ border-left: 6px solid var(--vale-teal); }
+.kpi-card[data-kpi="available"]{ border-left-color: var(--vale-green); }
+.kpi-card[data-kpi="loaned"]{ border-left-color: var(--vale-blue); }
+.kpi-card[data-kpi="unavailable"]{ border-left-color: #dc3545; }
+.kpi-card[data-kpi="problems"]{ border-left-color: #fd7e14; }
+.kpi-card[data-kpi="overdue"]{ border-left-color: #b02a37; }
+
+.kpi-icon{
+  width: 38px; height: 38px; border-radius: 12px;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(0,0,0,.04);
+  font-size: 1.2rem;
+}
+
+.tool-photo{ object-fit: cover; }
+
+</style>
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#004c45">
+<meta name="mobile-web-app-capable" content="yes">
+
+</head>
+
+<body>
+<button id="btnFullscreen" onclick="goFullScreen()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: #1E6E43; color: #fff; border: none; padding: 10px 15px; border-radius: 50%; width: 45px; height: 45px; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center;">
+<i class="bi bi-arrows-fullscreen"></i>
+</button>
+
+<script>
+function goFullScreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) elem.requestFullscreen();
+  else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+  else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+}
+</script>
+
+<style>
+  #welcomeBanner { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 50px; margin: 10px auto; background: linear-gradient(90deg, #1b6fb8 0%, #3aa8f2 100%); color: #fff; max-width: 400px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-family: "Segoe UI", sans-serif; font-size: 0.95rem; transition: all 0.3s ease; }
+  #welcomeBanner:hover { transform: scale(1.02); }
+  #welcomeBanner .avatar { width: 36px; height: 36px; border-radius: 50%; background: #fff; color: #1b6fb8; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+  #welcomeBanner .name { font-weight: 600; }
+  #welcomeBanner .subtitle { font-size: 0.8rem; color: #e3f3ff; }
+</style>
+
+<div id="welcomeBanner" style="display:none;">
+  <div class="avatar" id="welcomeAvatar">U</div>
+  <div class="text">
+    <div>Olá, <span class="name" id="welcomeName"></span>!</div>
+    <div class="subtitle">Bem-vindo(a) ao controle de ferramentas</div>
+  </div>
+</div>
+
+<nav class="vale-header py-2">
+<div class="container d-flex justify-content-between align-items-center">
+<div class="brand">
+<img alt="Vale" class="logo" id="valeLogo" src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Vale_logo.svg"/>
+<strong id="brandTitle">Vale</strong>
+</div>
+<div class="small"><span id="siteTag">Segurança e produtividade em primeiro lugar</span></div>
+</div>
+</nav>
+<nav class="app-bar py-2">
+<div class="container d-flex justify-content-between align-items-center">
+<div class="d-flex align-items-center gap-2">
+<span class="badge" style="background: var(--vale-green);">MVP</span>
+<h1 class="h5 mb-0 app-title">Ferramentaria Elétrica CA</h1>
+</div>
+<div class="d-flex align-items-center gap-2">
+<span class="badge text-bg-light d-none" id="currentUserBadge"></span>
+<button class="btn btn-sm btn-outline-secondary d-none" id="btnLogout">Sair</button>
+</div>
+</div>
+</nav>
+
+<main class="container py-4">
+<section class="row justify-content-center" id="authSection">
+<div class="col-lg-5">
+<div class="card p-4">
+<h5 class="mb-3">Entrar</h5>
+<div class="mb-2">
+<label class="form-label">E-mail</label>
+<input class="form-control" id="loginEmail" placeholder="voce@vale.com" type="email" autocomplete="username">
+</div>
+<div class="mb-3">
+<label class="form-label">Senha</label>
+<input class="form-control" id="loginPassword" placeholder="••••••" type="password" autocomplete="current-password">
+</div>
+<div class="d-grid gap-2">
+<button class="btn btn-success" id="btnLogin" style="background: var(--vale-green); border-color: var(--vale-green);">Entrar</button>
+<button class="btn btn-outline-secondary" id="btnShowSignup">Criar conta</button>
+</div>
+</div>
+</div>
+<div class="col-lg-5 d-none" id="signupCard">
+<div class="card p-4">
+<h5 class="mb-3">Criar conta</h5>
+<div class="mb-2"><label class="form-label">Nome</label><input class="form-control" id="suName" placeholder="Seu nome"/></div>
+<div class="mb-2"><label class="form-label">E-mail</label><input class="form-control" id="suEmail" placeholder="usuario@vale.com" type="email" autocomplete="username"/></div>
+<div class="mb-2"><label class="form-label">Senha</label><input class="form-control" id="suPassword" type="password" autocomplete="new-password"/></div>
+<div class="d-grid mt-3"><button class="btn btn-primary" id="btnSignup" style="background: var(--vale-teal); border-color: var(--vale-teal);">Registrar</button></div>
+</div>
+</div>
+</section>
+
+<section class="d-none" id="appSection">
+<ul class="nav nav-tabs" id="mainTabs" role="tablist">
+<li class="nav-item" role="presentation"><button class="nav-link" data-bs-target="#tabDashboard" data-bs-toggle="tab" role="tab" type="button">Dashboard</button></li>
+<li class="nav-item" role="presentation"><button class="nav-link active" data-bs-target="#tabFerramentas" data-bs-toggle="tab" role="tab" type="button">Ferramentas</button></li>
+<li class="nav-item d-none" role="presentation"><button class="nav-link" data-bs-target="#tabScanner" data-bs-toggle="tab" role="tab" type="button">Scanner QR</button></li>
+<li class="nav-item" role="presentation"><button class="nav-link" data-bs-target="#tabEmprestimos" data-bs-toggle="tab" role="tab" type="button">Empréstimos</button></li>
+<li class="nav-item" role="presentation"><button class="nav-link" data-bs-target="#tabAdmin" data-bs-toggle="tab" role="tab" type="button">Administração</button></li>
+<li class="nav-item" role="presentation"><button class="nav-link" data-bs-target="#tabLog" data-bs-toggle="tab" role="tab" type="button">Log</button></li>
+</ul>
+
+<div class="tab-content py-3">
+<div class="tab-pane fade" id="tabDashboard" role="tabpanel">
+  <div class="row g-3">
+    <div class="col-6 col-md-2">
+      <div class="card p-3 kpi-card hoverable" role="button" data-kpi="all" title="Ver todas as ferramentas">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="fw-bold">Total</div>
+            <div id="kpTotal" class="h5 mb-0">0</div>
+          </div>
+          <div class="kpi-icon"><i class="bi bi-grid-3x3-gap"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <div class="card p-3 kpi-card hoverable" role="button" data-kpi="loaned" title="Filtrar ferramentas emprestadas">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="fw-bold">Emprestadas</div>
+            <div id="kpLoaned" class="h5 mb-0">0</div>
+          </div>
+          <div class="kpi-icon"><i class="bi bi-arrow-left-right"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <div class="card p-3 kpi-card hoverable" role="button" data-kpi="available" title="Filtrar ferramentas disponíveis">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="fw-bold">Disponíveis</div>
+            <div id="kpAvailable" class="h5 mb-0">0</div>
+          </div>
+          <div class="kpi-icon"><i class="bi bi-check2-circle"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <div class="card p-3 kpi-card hoverable" role="button" data-kpi="unavailable" title="Filtrar ferramentas indisponíveis">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="fw-bold">Indisponíveis</div>
+            <div id="kpUnavailable" class="h5 mb-0">0</div>
+          </div>
+          <div class="kpi-icon"><i class="bi bi-x-octagon"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <div class="card p-3 kpi-card hoverable" role="button" data-kpi="problems" title="Ver devoluções com problema">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="fw-bold">Problemas</div>
+            <div id="kpProblems" class="h5 mb-0">0</div>
+          </div>
+          <div class="kpi-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-2">
+      <div class="card p-3 kpi-card hoverable" role="button" data-kpi="overdue" title="Ver empréstimos atrasados">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="fw-bold">Atrasadas</div>
+            <div id="kpOverdue" class="h5 mb-0">0</div>
+          </div>
+          <div class="kpi-icon"><i class="bi bi-alarm"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-3 g-3">
+    <div class="col-lg-7">
+      <div class="card p-3 hoverable">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0">Atalhos rápidos</h6>
+          <span class="text-muted small" id="dashboardUpdatedAt"></span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-sm btn-success" style="background: var(--vale-green);" data-bs-target="#modalTool" data-bs-toggle="modal" id="dashQuickNewTool">
+            <i class="bi bi-plus-circle me-1"></i> Nova ferramenta
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="dashQuickScanner">
+            <i class="bi bi-qr-code-scan me-1"></i> Abrir scanner
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="dashQuickTools">
+            <i class="bi bi-wrench-adjustable me-1"></i> Ver ferramentas
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="dashQuickLog">
+            <i class="bi bi-clock-history me-1"></i> Ver log
+          </button>
+        </div>
+        <div class="form-text mt-2">Dica: clique nos KPIs para aplicar filtros automaticamente.</div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0">Meus empréstimos</h6>
+          <span class="badge bg-light text-dark" id="myLoansCount">0</span>
+        </div>
+        <div id="myLoansList" class="list-group list-group-flush"></div>
+        <div class="text-muted small mt-2" id="myLoansEmpty" style="display:none;">Você não tem ferramentas emprestadas agora.</div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-3"><div class="col-12"><div class="card p-3"><canvas id="dashboardLoansChart" style="height:220px;"></canvas></div></div></div>
+  <div class="row mt-3">
+    <div class="col-md-6"><div class="card p-3"><h6 class="mb-2">Status das ferramentas</h6><canvas id="dashboardStatusPie" style="height:220px;"></canvas></div></div>
+    <div class="col-md-6"><div class="card p-3"><h6 class="mb-2">Top usuários</h6><canvas id="dashboardTopUsersBar" style="height:220px;"></canvas></div></div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-12"><h6>Últimas devoluções com problema</h6><div id="dashboardProblemsList"></div></div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-12">
+      <h6>Galeria de fotos (devoluções com problema)</h6>
+      <div class="row mb-2" id="galleryFiltersRow">
+        <div class="col-md-4"><label class="form-label">Usuário</label><select id="galleryUserSelect" class="form-select"><option value="">Todos</option></select></div>
+        <div class="col-md-3"><label class="form-label">Início</label><input type="date" id="galleryStartDate" class="form-control" /></div>
+        <div class="col-md-3"><label class="form-label">Fim</label><input type="date" id="galleryEndDate" class="form-control" /></div>
+        <div class="col-md-2 d-flex align-items-end"><div class="d-flex gap-2"><button class="btn btn-primary btn-sm" id="btnApplyGalleryFilter">Filtrar</button><button class="btn btn-outline-secondary btn-sm" id="btnClearGalleryFilter">Limpar</button></div></div>
+      </div>
+      <div id="dashboardPhotoGallery" class="d-flex flex-wrap gap-2"></div>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-md-3"><label class="form-label">Início</label><input type="date" id="dashStartDate" class="form-control" /></div>
+    <div class="col-md-3"><label class="form-label">Fim</label><input type="date" id="dashEndDate" class="form-control" /></div>
+    <div class="col-md-6 d-flex align-items-end"><div class="btn-group" role="group"><button type="button" class="btn btn-sm btn-outline-primary" id="btnLast7">7 dias</button><button type="button" class="btn btn-sm btn-outline-primary" id="btnLast30">30 dias</button><button type="button" class="btn btn-sm btn-outline-secondary" id="btnClearRange">Limpar</button></div></div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-12 d-flex gap-2">
+      <button class="btn btn-outline-secondary" id="btnExportProblemsCsv">Exportar problemas (CSV)</button>
+      <button class="btn btn-outline-secondary" id="btnRefreshDashboard">Atualizar dashboard</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-pane fade show active" id="tabFerramentas" role="tabpanel">
+<div class="d-flex flex-wrap gap-2 mb-3 align-items-end">
+  <div class="flex-grow-1">
+    <label class="form-label">Buscar</label>
+    <input class="form-control" id="searchTools" placeholder="Nome, código ou status"/>
+  </div>
+
+  <div>
+    <label class="form-label">Status</label>
+    <select class="form-select" id="filterStatus">
+      <option value="all">Todos</option>
+      <option value="available">Disponível</option>
+      <option value="loaned">Emprestada</option>
+      <option value="unavailable">Indisponível</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="form-label">Atraso</label>
+    <select class="form-select" id="filterOverdue">
+      <option value="all">Todos</option>
+      <option value="ontime">No prazo</option>
+      <option value="overdue">Atrasado</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="form-label">Ordenar</label>
+    <select class="form-select" id="sortTools">
+      <option value="nameAsc">Nome (A-Z)</option>
+      <option value="codeAsc">Código (A-Z)</option>
+      <option value="status">Status</option>
+    </select>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-secondary" type="button" id="btnClearToolsFilters" title="Limpar filtros">
+      <i class="bi bi-x-circle me-1"></i> Limpar
+    </button>
+    <button class="btn btn-success" data-bs-target="#modalTool" data-bs-toggle="modal" id="btnNewTool" style="background: var(--vale-green);">
+      + Nova ferramenta
+    </button>
+  </div>
+
+  <div class="ms-auto">
+    <div class="text-muted small">Resultados: <span class="badge bg-light text-dark" id="toolsCount">0</span></div>
+  </div>
+</div>
+<div class="row g-3" id="toolsList"></div>
+</div>
+
+<div class="tab-pane fade" id="tabScanner" role="tabpanel">
+<div class="row g-3">
+<div class="col-lg-6">
+<div class="card p-3">
+<h6 class="mb-2">Ler QR code</h6>
+<div class="border rounded" id="reader" style="min-height:320px;"></div>
+<div class="form-text mt-2">Aponte para o código.</div>
+</div>
+</div>
+<div class="col-lg-6">
+<div class="card p-3">
+<h6 class="mb-2">Resultado</h6>
+<div class="text-muted" id="scanResult">Aguardando leitura…</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="tab-pane fade" id="tabEmprestimos" role="tabpanel">
+<div class="d-flex justify-content-between align-items-center mb-2"><h6 class="mb-0">Ativos</h6><div class="form-text">Devolução em até <b>48h</b></div></div>
+<div class="list-group" id="loansList"></div>
+</div>
+
+<div class="tab-pane fade" id="tabAdmin" role="tabpanel">
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card p-3 border-danger" id="backupCard">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h6 class="mb-1 fw-bold">Backup de Segurança</h6>
+                    <div id="backupStatusText" class="small text-muted">Verificando status...</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" id="btnSmartBackup"><i class="bi bi-download"></i> Fazer Backup Agora</button>
+                    <label class="btn btn-outline-secondary" title="Restaurar backup antigo"><i class="bi bi-upload"></i> Restaurar<input type="file" id="importJsonSmart" accept="application/json" class="d-none"></label>
+                </div>
+            </div>
+            <div id="backupAlert" class="alert alert-danger mt-2 mb-0 d-none" role="alert"><i class="bi bi-exclamation-triangle-fill"></i> <strong>Atenção:</strong> Você não faz backup há mais de <span id="daysSinceBackup">7</span> dias!</div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card p-3">
+        <h6>Configurações de Marca</h6>
+        <div class="mb-2"><label class="form-label">URL do logo</label><input class="form-control" id="cfgLogo"/>
+        <label class="btn btn-outline-secondary mb-0" title="Escolher arquivo"><i class="bi bi-image"></i> Escolher arquivo<input type="file" accept="image/*" id="cfgLogoFile" style="display:none;"></label>
+        <img id="cfgLogoPreview" alt="preview" style="height:40px; display:none; margin-top:5px;"/></div>
+        <div class="row g-2">
+        <div class="col-md-6"><label class="form-label">Título</label><input class="form-control" id="cfgBrandTitle" placeholder="Vale"/></div>
+        <div class="col-md-6"><label class="form-label">Slogan</label><input class="form-control" id="cfgTag"/></div>
+        </div>
+        <div class="mb-2 mt-2"><label class="form-label">Webhook (Power Automate)</label><input class="form-control" id="cfgWebhook"/></div>
+        <button class="btn btn-primary" id="btnSaveSettings">Salvar Configurações</button>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card p-3">
+        <h6>Usuários (Admin)</h6>
+        <button class="btn btn-sm btn-success mb-2" id="btnNewUser">+ Novo usuário</button>
+        <div class="list-group small" id="usersList"></div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card p-3">
+        <h6>Imprimir QR Codes</h6>
+        <div id="qrArea"></div>
+        <div class="d-flex gap-2 mt-2"><button class="btn btn-outline-primary" id="btnRenderQRCodes">Gerar etiquetas</button><button class="btn btn-outline-secondary" onclick="window.print()">Imprimir</button></div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="tab-pane fade" id="tabLog" role="tabpanel"><div class="list-group small" id="logList"></div></div>
+</div>
+</section>
+</main>
+
+<footer class="vale-footer border-top py-3">
+<div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+<div>© <span id="year"></span> Vale — Uso interno</div>
+<div class="d-flex gap-3"><a href="#" id="linkPoliticas">Políticas</a><a href="#" id="linkAjuda">Ajuda</a></div>
+</div>
+</footer>
+
+<div class="modal fade" id="modalTool" tabindex="-1">
+<div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+<div class="modal-header"><h5 class="modal-title" id="toolModalTitle">Nova ferramenta</h5><button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button></div>
+<div class="modal-body">
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label">Nome</label><input class="form-control" id="toolName" placeholder="Ex.: Chave de boca 24mm"/></div>
+<div class="col-md-6"><label class="form-label">Código</label><input class="form-control" id="toolCode" placeholder="Ex.: FERR-0001"/></div>
+<div class="col-md-6"><label class="form-label">Foto</label><input accept="image/*" class="form-control" id="toolPhoto" type="file"/><img class="mt-2 tool-photo d-none" id="toolPreview"/></div>
+<div class="col-md-6"><label class="form-label">Observações</label><input class="form-control" id="toolNotes"/></div>
+</div>
+</div>
+<div class="modal-footer">
+  <div class="me-auto d-flex gap-2">
+    <button class="btn btn-danger d-none" id="btnDeleteTool" type="button"><i class="bi bi-trash"></i> Excluir</button>
+    <button class="btn btn-warning d-none" id="btnReactivateTool" type="button"><i class="bi bi-wrench-adjustable"></i> Reativar</button>
+  </div>
+  <button class="btn btn-outline-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+  <button class="btn btn-success" id="btnSaveTool">Salvar</button>
+</div>
+</div></div>
+</div>
+
+<div class="modal fade" id="modalUser" tabindex="-1">
+<div class="modal-dialog"><div class="modal-content">
+<div class="modal-header"><h5 class="modal-title">Novo usuário</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="mb-2"><label class="form-label">Nome</label><input class="form-control" id="usrName"/></div>
+<div class="mb-2"><label class="form-label">E-mail</label><input class="form-control" id="usrEmail"/></div>
+<div class="mb-2"><label class="form-label">Senha inicial</label><input class="form-control" id="usrPass" value="Vale@2025"/></div>
+</div>
+<div class="modal-footer"><button class="btn btn-primary" id="btnSaveUser">Salvar</button></div>
+</div></div>
+</div>
+
+<div class="modal fade" id="modalScanTool" tabindex="-1">
+<div class="modal-dialog modal-md"><div class="modal-content">
+<div class="modal-header"><h5 class="modal-title">Escanear QR</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="small text-muted">Aponte para: <b><span id="scanToolName"></span></b> (<code id="scanToolCode"></code>).</div>
+<div class="border rounded mt-2" id="toolScanReader" style="min-height:280px;"></div>
+<div class="mt-2 small" id="toolScanMsg"></div>
+</div>
+</div></div>
+</div>
+
+<div class="modal fade" id="returnConditionModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Devolução / Condição</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="returnToolInfo" class="mb-2 small text-muted"></div>
+        <div class="mb-3">
+          <label class="form-label">Condição</label>
+          <select id="returnConditionSelect" class="form-select">
+            <option value="clean">Boas condições / Limpa</option>
+            <option value="dirty">Suja</option>
+            <option value="damaged">Danificada</option>
+          </select>
+        </div>
+        <div id="returnDescWrapper" class="mb-3" style="display:none;">
+          <label class="form-label" id="returnDescLabel">Descrição</label>
+          <div class="form-text" id="returnDescHelp"></div>
+          <textarea id="returnDescription" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="mb-3" id="returnPhotoSection">
+          <label class="form-label" id="returnPhotoLabel">Foto de Registro</label>
+          <div class="form-text" id="returnPhotoHelp"></div>
+          <input type="file" id="returnPhotoInput" accept="image/*" capture="environment" class="form-control" />
+          <div id="returnPhotoPreview" style="display:none; margin-top:6px;">
+            <img id="returnPhotoImg" src="" alt="Preview" style="max-width:180px; border-radius:6px; border:1px solid #ddd;" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="confirmReturnBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="photoViewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-body p-0"><img id="photoViewImg" src="" style="width:100%; height:auto;" /></div>
+        <div class="modal-footer"><a id="photoDownloadLink" class="btn btn-primary" href="#" download>Baixar</a><button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button></div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmLoanModal" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Confirmar Empréstimo</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><p id="confirmLoanText">Emprestar ferramenta?</p></div>
+      <div class="modal-footer"><button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-success" id="confirmLoanBtn">Confirmar</button></div>
+  </div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // --- 1. UTILS & COMPRESSÃO ---
+    function compressImage(file, maxWidth, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxWidth) { height = Math.round(height * (maxWidth / width)); width = maxWidth; }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
+    window.compressImage = compressImage;
+
+    const $ = (sel) => document.querySelector(sel);
+
+    // --- HELPERS DE SEGURANÇA (XSS / URLs) ---
+    const esc = (v) => String(v ?? '').replace(/[&<>"'`]/g, (ch) => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;',
+        '`':'&#96;'
+    }[ch]));
+
+    const safeImgSrc = (src) => {
+        const s = String(src ?? '').trim();
+        if(!s) return 'https://via.placeholder.com/64';
+        if(s.startsWith('data:image/')) return s;
+        if(s.startsWith('blob:')) return s;
+        if(/^https?:\/\//i.test(s)) return s;
+        return 'https://via.placeholder.com/64';
+    };
+
+    // --- PHOTO STORE (IndexedDB) ---
+    const PhotoStore = (() => {
+        const DB_NAME = 'fi_photos_db';
+        const STORE = 'photos';
+        let _dbPromise = null;
+        const _urlCache = new Map(); // id -> objectURL
+
+        function open(){
+            if(_dbPromise) return _dbPromise;
+            _dbPromise = new Promise((resolve, reject) => {
+                try{
+                    const req = indexedDB.open(DB_NAME, 1);
+                    req.onupgradeneeded = () => {
+                        const db = req.result;
+                        if(!db.objectStoreNames.contains(STORE)){
+                            db.createObjectStore(STORE, { keyPath: 'id' });
+                        }
+                    };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                } catch(e){ reject(e); }
+            });
+            return _dbPromise;
+        }
+
+        async function putBlob(id, blob, meta={}){
+            if(!id || !blob) return '';
+            const db = await open();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE, 'readwrite');
+                tx.objectStore(STORE).put({ id, blob, type: blob.type || meta.type || '', ts: meta.ts || Date.now() });
+                tx.oncomplete = () => resolve(id);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function putDataUrl(id, dataUrl, meta={}){
+            const blob = await fetch(String(dataUrl)).then(r => r.blob());
+            return putBlob(id, blob, meta);
+        }
+
+        async function getRecord(id){
+            if(!id) return null;
+            const db = await open();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE, 'readonly');
+                const req = tx.objectStore(STORE).get(id);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function getBlob(id){
+            const rec = await getRecord(id);
+            return rec?.blob || null;
+        }
+
+        function peekUrl(id){
+            if(!id) return '';
+            return _urlCache.get(id) || '';
+        }
+
+        async function getUrl(id){
+            if(!id) return '';
+            if(_urlCache.has(id)) return _urlCache.get(id);
+            const blob = await getBlob(id);
+            if(!blob) return '';
+            const url = URL.createObjectURL(blob);
+            _urlCache.set(id, url);
+            return url;
+        }
+
+        function revokeAll(){
+            for(const u of _urlCache.values()){
+                try{ URL.revokeObjectURL(u); } catch(e){}
+            }
+            _urlCache.clear();
+        }
+
+        async function clearAll(){
+            const db = await open();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE, 'readwrite');
+                tx.objectStore(STORE).clear();
+                tx.oncomplete = () => { revokeAll(); resolve(true); };
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function exportAsDataUrlMap(ids){
+            const out = {};
+            for(const id of (ids || [])){
+                try{
+                    const blob = await getBlob(id);
+                    if(!blob) continue;
+                    const dataUrl = await new Promise((res, rej) => {
+                        const fr = new FileReader();
+                        fr.onload = () => res(fr.result);
+                        fr.onerror = () => rej(fr.error);
+                        fr.readAsDataURL(blob);
+                    });
+                    out[id] = { data: dataUrl, type: blob.type || '', ts: Date.now() };
+                } catch(e){ console.warn('photo export failed', id, e); }
+            }
+            return out;
+        }
+
+        async function importFromDataUrlMap(map){
+            if(!map || typeof map !== 'object') return;
+            for(const [id, v] of Object.entries(map)){
+                if(!v?.data) continue;
+                try{
+                    await putDataUrl(id, v.data, { ts: v.ts || Date.now(), type: v.type || '' });
+                } catch(e){ console.warn('photo import failed', id, e); }
+            }
+        }
+
+        return { open, putBlob, putDataUrl, getUrl, peekUrl, clearAll, exportAsDataUrlMap, importFromDataUrlMap, revokeAll };
+    })();
+
+    // Migra fotos antigas (base64 no localStorage) para IndexedDB
+    async function migratePhotosToIDB(){
+        try{ await PhotoStore.open(); } catch(e){ console.warn('PhotoStore open failed', e); }
+
+        // 1) Fotos das ferramentas
+        try{
+            const tools = DB.tools();
+            let changed = false;
+            for(const t of tools){
+                const legacy = String(t?.photo || '').trim();
+                if(!t) continue;
+                if(!t.photoId && legacy.startsWith('data:image/')){
+                    const pid = `tool_${t.id}`;
+                    try{
+                        await PhotoStore.putDataUrl(pid, legacy, { ts: Date.now() });
+                        t.photoId = pid;
+                        t.photo = '';
+                        changed = true;
+                    } catch(e){ console.warn('migrate tool photo failed', t.id, e); }
+                }
+            }
+            if(changed) ls.set('fi_tools', tools);
+        } catch(e){ console.warn('migrate tools failed', e); }
+
+        // 2) Fotos de devolução (problemas)
+        try{
+            const loans = DB.loans();
+            let changed = false;
+            for(const l of loans){
+                if(!l || !Array.isArray(l.returnPhotos)) continue;
+                const newArr = [];
+                let localChanged = false;
+
+                for(const p of l.returnPhotos){
+                    if(p && typeof p === 'object' && p.id){
+                        newArr.push(p);
+                        continue;
+                    }
+                    const ts = (p && typeof p === 'object' && p.ts) ? p.ts : Date.now();
+                    const legacy = (p && typeof p === 'object' && p.data) ? String(p.data) : (typeof p === 'string' ? p : '');
+                    if(legacy && legacy.startsWith('data:image/')){
+                        const pid = `loan_${l.id || l.toolId || 'x'}_${ts}`;
+                        try{
+                            await PhotoStore.putDataUrl(pid, legacy, { ts });
+                            newArr.push({ ts, id: pid });
+                            localChanged = true;
+                        } catch(e){
+                            console.warn('migrate loan photo failed', l.id, e);
+                        }
+                    }
+                }
+
+                if(localChanged){
+                    l.returnPhotos = newArr;
+                    localChanged = false;
+                    changed = true;
+                }
+            }
+            if(changed) ls.set('fi_loans', loans);
+        } catch(e){ console.warn('migrate loans failed', e); }
+    }
+
+    function hydrateToolPhotos(){
+        const root = document.getElementById('toolsList');
+        if(!root) return;
+        root.querySelectorAll('img[data-photo-id]').forEach(img => {
+            const pid = img.dataset.photoId || '';
+            if(!pid) return;
+            const cached = PhotoStore.peekUrl(pid);
+            if(cached){ img.src = cached; return; }
+            const wanted = pid;
+            PhotoStore.getUrl(wanted).then(url => {
+                if(!url) return;
+                if(img.dataset.photoId !== wanted) return;
+                img.src = url;
+            }).catch(()=>{});
+        });
+    }
+
+
+
+    // Evita injetar nome/código no onclick: usa só o id.
+    window.openScanToolModalById = (toolId) => {
+        const t = DB.tools().find(x=>x.id===toolId);
+        if(!t) return;
+        window.openScanToolModal({ id:t.id, name:t.name, code:t.code });
+    };
+
+    const ls = {
+      get:(k,d)=>{ try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+      set:(k,v)=>{
+        try {
+          localStorage.setItem(k, JSON.stringify(v));
+          return true;
+        } catch(e){
+          console.error('localStorage error', e);
+          alert('Não foi possível salvar os dados no navegador (possível limite de armazenamento, geralmente por causa de fotos).\n\nDicas: use uma foto menor, ou limpe os dados deste site no navegador (armazenamento/cache do site).');
+          return false;
+        }
+      }
+    };
+    const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const nowIso = () => new Date().toISOString();
+    const ADMIN_EMAIL = 'rafael.souza10@vale.com';
+
+    // Bootstrap Modal helper (Bootstrap 5 espera HTMLElement, não string "#id")
+    function modalById(id){
+        const el = document.getElementById(id);
+        return el ? bootstrap.Modal.getOrCreateInstance(el) : null;
+    }
+
+    // --- 2. DATABASE ---
+    const DB = {
+      users: () => ls.get('fi_users', []),
+      tools: () => ls.get('fi_tools', []),
+      loans: () => ls.get('fi_loans', []),
+      logs: () => ls.get('fi_logs', []),
+      settings: () => ls.get('fi_settings', { webhook:"" }),
+      brand: () => ls.get('fi_brand', { logo:'', title:'Vale', tag:'', colors:{ primary:'#1E6E43', secondary:'#3BA99C', bg:'#F4F6F6' } })
+    };
+    function log(event, data={}){ const logs=DB.logs(); logs.unshift({id:uid(), ts:nowIso(), user:session.user?.email||'-', event, data}); ls.set('fi_logs', logs.slice(0,500)); renderLog(); }
+
+    // --- 3. QR MANAGER (UNIFICADO) ---
+
+    // Beep (QR detect)
+    const Beeper = {
+        ctx: null,
+        lastAt: 0,
+        async ensure() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!this.ctx) this.ctx = new AudioCtx();
+                if (this.ctx.state === 'suspended') await this.ctx.resume();
+            } catch (e) { /* ignore */ }
+        },
+        async beep() {
+            const now = Date.now();
+            if (now - this.lastAt < 400) return; // evita metralhadora de beeps
+            this.lastAt = now;
+            try {
+                await this.ensure();
+
+                const o = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+
+                o.frequency.value = 880; // tom do beep
+                g.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.25, this.ctx.currentTime + 0.01);
+                g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.12);
+
+                o.connect(g);
+                g.connect(this.ctx.destination);
+
+                o.start();
+                o.stop(this.ctx.currentTime + 0.13);
+            } catch (e) { /* sem barulho de erro */ }
+        }
+    };
+
+    const QRManager = {
+        instance: null,
+        activeElementId: null,
+        async stop() {
+            if (this.instance) {
+                try { if (this.instance.isScanning) { await this.instance.stop(); } this.instance.clear(); } catch (e) { console.warn("Clean stop error", e); }
+                this.instance = null;
+                this.activeElementId = null;
+            }
+        },
+        async start(elementId, onSuccessCallback) {
+            await this.stop();
+            this.activeElementId = elementId;
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            element.innerHTML = '';
+            await Beeper.ensure();
+            this.instance = new Html5Qrcode(elementId);
+            try {
+                await this.instance.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+                    (text) => {
+                        // Beep + Visual
+                        
+                        Beeper.beep();
+                        const el = document.getElementById(elementId);
+                        if(el) { el.classList.add('scan-success-flash', 'flash'); setTimeout(()=>el.classList.remove('flash'), 500); }
+                        onSuccessCallback(text);
+                    },
+                    (err) => {}
+                );
+            } catch (err) {
+                element.innerHTML = `<div class="alert alert-danger">Erro na câmera: ${err.message}. Use HTTPS.</div>`;
+            }
+        }
+    };
+
+    window.startScanner = function() {
+        QRManager.start('reader', (decodedText) => {
+             $('#scanResult').textContent = decodedText;
+             const t = DB.tools().find(x => x.code === decodedText);
+             if(!t){ $('#scanResult').innerHTML = `<div class="alert alert-danger mt-2">❌ Não encontrado: <b>${decodedText}</b></div>`; return; }
+             if(t.status === 'available'){
+                 if(!session.user) return alert('Faça login.');
+                 showConfirmLoan(t, () => { doLoan(t); $('#scanResult').innerHTML = `<div class="alert alert-success">Emprestado: <b>${t.name}</b></div>`; });
+             } else if(t.status === 'loaned'){
+                 if(!session.user || t.holder !== session.user.id){ $('#scanResult').innerHTML = `<div class="alert alert-warning">Com: ${DB.users().find(u=>u.id===t.holder)?.name || '-'}</div>`; return; }
+                 showReturnModal(t, () => { doReturn(t); $('#scanResult').innerHTML = `<div class="alert alert-info">Devolvido: <b>${t.name}</b></div>`; });
+             } else {
+                 $('#scanResult').innerHTML = `<div class="alert alert-danger">🚫 Indisponível para empréstimo (danificada).</div>`;
+             }
+        });
+    };
+    window.stopScanner = function() { QRManager.stop(); };
+
+    let toolScanningId = null;
+    window.openScanToolModal = async function(tool) {
+        await QRManager.stop();
+        toolScanningId = tool.id;
+        $('#scanToolName').textContent = tool.name;
+        $('#scanToolCode').textContent = tool.code;
+        $('#toolScanMsg').textContent = 'Aguardando...';
+        const modal = modalById('modalScanTool');
+        modal?.show();
+
+        setTimeout(() => {
+            QRManager.start('toolScanReader', (decodedText) => {
+                const t = DB.tools().find(x => x.id === toolScanningId);
+                if (decodedText === t.code) {
+                    $('#toolScanMsg').innerHTML = '<span class="text-success fw-bold">QR Confirmado! ✅</span>';
+                    if(t.status === 'available') {
+                        showConfirmLoan(t, () => { doLoan(t); modal?.hide(); });
+                    } else if(t.status === 'loaned') {
+                        showReturnModal(t, () => { doReturn(t); modal?.hide(); });
+                    } else {
+                        $('#toolScanMsg').innerHTML = '<span class="text-danger fw-bold">🚫 Indisponível para empréstimo (danificada).</span>';
+                        setTimeout(()=>modal?.hide(), 800);
+                    }
+                } else {
+                    $('#toolScanMsg').innerHTML = `<span class="text-danger">❌ Errado! Leu: <b>${decodedText}</b></span>`;
+                }
+            });
+        }, 400);
+    };
+    document.getElementById('modalScanTool').addEventListener('hidden.bs.modal', () => QRManager.stop());
+
+    // --- 4. SESSION ---
+    const session = { user:null };
+    // --- AUTO LOGOUT POR INATIVIDADE ---
+    // Ajustado: 1 min de inatividade + aviso nos últimos 10s.
+    const INACTIVITY_MS = 1 * 60 * 1000;
+    const WARNING_MS = 10 * 1000;
+
+    let inactivityTimer = null;
+    let inactivityWarnTimer = null;
+    let warningInterval = null;
+
+    function hideSessionWarning(){
+        const el = document.getElementById('sessionExpiryAlert');
+        if(el) el.remove();
+        if(warningInterval) clearInterval(warningInterval);
+        warningInterval = null;
+    }
+
+    function showSessionWarning(){
+        hideSessionWarning();
+
+        const el = document.createElement('div');
+        el.id = 'sessionExpiryAlert';
+        el.className = 'alert alert-warning shadow d-flex align-items-center justify-content-between gap-3';
+        el.style.position = 'fixed';
+        el.style.right = '16px';
+        el.style.bottom = '16px';
+        el.style.zIndex = '1080';
+        el.style.maxWidth = '420px';
+
+        const msg = document.createElement('div');
+        msg.className = 'small';
+        msg.innerHTML = `<b>Sessão vai expirar</b><div id="sessionExpiryCountdown" class="text-muted">em ${Math.ceil(WARNING_MS/1000)}s</div>`;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-sm btn-outline-dark';
+        btn.textContent = 'Continuar';
+        btn.addEventListener('click', ()=>{
+            hideSessionWarning();
+            resetInactivityTimer();
+        });
+
+        el.appendChild(msg);
+        el.appendChild(btn);
+        document.body.appendChild(el);
+
+        let remaining = Math.ceil(WARNING_MS/1000);
+        warningInterval = setInterval(()=>{
+            remaining -= 1;
+            const cd = document.getElementById('sessionExpiryCountdown');
+            if(cd) cd.textContent = `em ${Math.max(remaining,0)}s`;
+            if(remaining <= 0){
+                if(warningInterval) clearInterval(warningInterval);
+                warningInterval = null;
+            }
+        }, 1000);
+    }
+
+    function stopInactivityWatchdog(){
+        if(inactivityTimer) clearTimeout(inactivityTimer);
+        if(inactivityWarnTimer) clearTimeout(inactivityWarnTimer);
+        inactivityTimer = null;
+        inactivityWarnTimer = null;
+        hideSessionWarning();
+    }
+
+    function resetInactivityTimer(){
+        if(!session.user) return;
+
+        stopInactivityWatchdog();
+
+        // Aviso antes de expirar
+        inactivityWarnTimer = setTimeout(()=>{
+            showSessionWarning();
+        }, Math.max(INACTIVITY_MS - WARNING_MS, 0));
+
+        // Expiração
+        inactivityTimer = setTimeout(()=>{
+            try { log('AUTO_LOGOUT', { reason:'inatividade', ms: INACTIVITY_MS, user: session.user?.email }); } catch(e){}
+            setSessionUser(null);
+            setTimeout(()=> location.reload(), 80);
+        }, INACTIVITY_MS);
+    }
+
+    function startInactivityWatchdog(){
+        resetInactivityTimer();
+    }
+
+
+    // Qualquer interação "acorda" o timer
+    ['click','mousemove','keydown','scroll','touchstart'].forEach(evt=>{
+        document.addEventListener(evt, resetInactivityTimer, { passive:true });
+    });
+    window.addEventListener('focus', resetInactivityTimer);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) resetInactivityTimer(); });
+;
+    const isAdmin = (u) => u && u.email && u.email.toLowerCase()===ADMIN_EMAIL.toLowerCase();
+    function setSessionUser(user){
+        session.user = user ? {...user, role: isAdmin(user)?'admin':'user'} : null;
+        if(user){
+            $('#currentUserBadge').textContent = `${session.user.name}`;
+            $('#currentUserBadge').classList.remove('d-none'); $('#btnLogout').classList.remove('d-none');
+            $('#authSection').classList.add('d-none'); $('#appSection').classList.remove('d-none');
+            $('#welcomeName').textContent = user.name; $('#welcomeAvatar').textContent = user.name.charAt(0);
+            $('#welcomeBanner').style.display='flex';
+            applyAdminGuards(); renderAll();
+        setupDashboardUX();
+        updateBackupUI();
+            startInactivityWatchdog();
+            if($('.nav-link.active').getAttribute('data-bs-target') === '#tabScanner') window.startScanner();
+        } else {
+            $('#loginEmail').value=''; $('#loginPassword').value='';
+            $('#currentUserBadge').classList.add('d-none'); $('#btnLogout').classList.add('d-none');
+            $('#authSection').classList.remove('d-none'); $('#appSection').classList.add('d-none');
+            $('#welcomeBanner').style.display='none';
+            PhotoStore.revokeAll();
+            stopInactivityWatchdog();
+            window.stopScanner();
+        }
+    }
+    function applyAdminGuards(){
+        const admin=isAdmin(session.user);
+        $('#btnNewTool').style.display = admin? 'inline-block' : 'none';
+        const qNew=document.getElementById('dashQuickNewTool'); if(qNew) qNew.style.display = admin? 'inline-block' : 'none';
+        const qLog=document.getElementById('dashQuickLog'); if(qLog) qLog.style.display = admin? 'inline-block' : 'none';
+        const tabs = document.querySelectorAll('button[data-bs-target="#tabAdmin"], button[data-bs-target="#tabLog"]');
+        tabs.forEach(t => t.parentElement.style.display = admin ? 'block' : 'none');
+    }
+
+    // --- 5. AUTH HANDLERS ---
+    (function seed(){
+        const users=DB.users();
+        if(!users.find(u=>u.email===ADMIN_EMAIL)){
+            users.push({ id:uid(), name:'Administrador', email:ADMIN_EMAIL, password:'Vale@2025', role:'admin' });
+            ls.set('fi_users', users);
+        }
+    })();
+
+    $('#btnShowSignup').onclick = ()=> $('#signupCard').classList.toggle('d-none');
+    $('#btnSignup').onclick = ()=>{
+        const name=$('#suName').value.trim(), email=$('#suEmail').value.trim().toLowerCase(), pass=$('#suPassword').value;
+        if(!name||!email||!pass) return alert('Preencha tudo');
+        const users=DB.users();
+        if(users.find(u=>u.email===email)) return alert('Já existe');
+        users.push({ id:uid(), name, email, password:pass, role:'user' }); ls.set('fi_users', users);
+        alert('Criado!'); $('#signupCard').classList.add('d-none');
+    };
+    $('#btnLogin').onclick = ()=>{
+        const email=$('#loginEmail').value.trim().toLowerCase(), pass=$('#loginPassword').value;
+        const user=DB.users().find(u=>u.email===email && u.password===pass);
+        if(!user) return alert('Inválido');
+        setSessionUser(user);
+    };
+    $('#btnLogout').onclick = ()=> setSessionUser(null);
+
+    // --- 6. TOOLS LOGIC ---
+    let editToolId=null;
+    function renderTools(){
+        const term = ($('#searchTools')?.value || '').toLowerCase();
+        const fStatus = ($('#filterStatus')?.value || 'all');
+        const fOver = ($('#filterOverdue')?.value || 'all');
+        const sort = ($('#sortTools')?.value || 'nameAsc');
+
+        const openLoans = DB.loans().filter(x=>!x.returnedAt);
+        const tools = DB.tools().filter(t=>{
+            const hay = `${t.name} ${t.code} ${t.status}`.toLowerCase();
+            if(term && !hay.includes(term)) return false;
+            if(fStatus!=='all' && t.status!==fStatus) return false;
+
+            if(fOver!=='all'){
+                const loan = openLoans.find(x=>x.toolId===t.id);
+                if(!loan) return false;
+                const overdue = loan.dueAt && (new Date(loan.dueAt) < new Date());
+                if(fOver==='overdue' && !overdue) return false;
+                if(fOver==='ontime' && overdue) return false;
+            }
+            return true;
+        });
+
+        // ordenação
+        const statusOrder = { available:0, loaned:1, unavailable:2 };
+        tools.sort((a,b)=>{
+            if(sort==='codeAsc') return (a.code||'').localeCompare(b.code||'');
+            if(sort==='status') return (statusOrder[a.status]??9) - (statusOrder[b.status]??9) || (a.name||'').localeCompare(b.name||'');
+            return (a.name||'').localeCompare(b.name||'');
+        });
+
+        const countEl = document.getElementById('toolsCount');
+        if(countEl) countEl.textContent = tools.length;
+        const c=$('#toolsList'); c.innerHTML='';
+        tools.forEach(t=>{
+            const isHolder = session.user && t.holder === session.user.id;
+            const holderNameRaw = t.holder ? DB.users().find(u=>u.id===t.holder)?.name : null;
+
+            const toolName = esc(t.name);
+            const toolCode = esc(t.code);
+            const holderName = esc(holderNameRaw || '');
+            const photoId = t.photoId || '';
+            const photoSrc = PhotoStore.peekUrl(photoId) || safeImgSrc(t.photo);
+
+            c.innerHTML += `<div class="col-md-6 col-lg-4"><div class="card p-3 h-100 ${isHolder?'holder-highlight':''}" style="border-top:4px solid var(--vale-teal);">
+                <div class="d-flex align-items-center gap-3"><img src="${photoSrc}" data-photo-id="${esc(photoId)}" class="tool-photo"/>
+                <div class="flex-grow-1"><div class="fw-bold">${toolName}</div><div class="text-muted small">${toolCode}</div>
+                <span class="badge ${t.status==='available'?'bg-success':(t.status==='loaned'?'bg-warning text-dark':'bg-secondary')}">${t.status==='available'?'Disponível':(t.status==='loaned'?'Emprestada':'Indisponível')}</span>
+                ${t.status==='loaned'?`<div class="small mt-1">Com: <b>${holderName}</b></div>`:''}</div></div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button class="btn btn-sm btn-outline-primary" onclick="clickLoan('${t.id}')" ${(t.status==='loaned'&&!isHolder)||t.status==='unavailable'?'disabled':''}>${t.status==='available'?'Emprestar':(t.status==='loaned'?'Devolver':'Indisponível')}</button>
+                    <button class="btn btn-sm btn-outline-success" onclick="window.openScanToolModalById('${t.id}')">QR</button>
+                    ${isAdmin(session.user)?`<button class="btn btn-sm btn-outline-secondary" onclick="editTool('${t.id}')">Editar</button>${t.status==='unavailable'?`<button class=\"btn btn-sm btn-outline-warning\" onclick=\"reactivateTool('${t.id}')\">Reativar</button>`:''}`:''}
+                </div>
+            </div></div>`;
+        });
+
+        hydrateToolPhotos();
+    }
+
+    $('#searchTools').oninput = renderTools;
+    $('#filterStatus').onchange = renderTools;
+    if($('#filterOverdue')) $('#filterOverdue').onchange = renderTools;
+    if($('#sortTools')) $('#sortTools').onchange = renderTools;
+    if($('#btnClearToolsFilters')) $('#btnClearToolsFilters').onclick = ()=>{
+        $('#searchTools').value = '';
+        $('#filterStatus').value = 'all';
+        if($('#filterOverdue')) $('#filterOverdue').value = 'all';
+        if($('#sortTools')) $('#sortTools').value = 'nameAsc';
+        renderTools();
+    };
+
+    window.clickLoan = (id) => {
+        const t = DB.tools().find(x=>x.id===id);
+        if(!t) return;
+        if(t.status==='available') return showConfirmLoan(t, ()=>doLoan(t));
+        if(t.status==='loaned') return showReturnModal(t, ()=>doReturn(t));
+        return alert('Esta ferramenta está indisponível (danificada). Procure o administrador.');
+    };
+
+window.reactivateTool = (id) => {
+    if(!isAdmin(session.user)) return;
+    const tools = DB.tools();
+    const t = tools.find(x=>x.id===id);
+    if(!t) return;
+    if(t.status !== 'unavailable') return alert('Esta ferramenta não está indisponível.');
+    if(!confirm(`Reativar "${t.name}" (${t.code}) e marcar como DISPONÍVEL?`)) return;
+
+    t.status = 'available';
+    t.holder = null;
+
+    const entry = { ts: nowIso(), by: session.user.email, byName: session.user.name, action:'reactivate' };
+    t.maintenanceHistory = Array.isArray(t.maintenanceHistory) ? t.maintenanceHistory : [];
+    t.maintenanceHistory.unshift(entry);
+
+    if(!ls.set('fi_tools', tools)) return;
+    log('tool_reactivate', { toolId:t.id, code:t.code });
+    // fecha modal se estiver aberto
+    try { bootstrap.Modal.getInstance(document.getElementById('modalTool'))?.hide(); } catch(e){}
+    renderAll();
+};
+
+        window.editTool = (id) => {
+            const t = DB.tools().find(x=>x.id===id);
+            if(!t) return;
+            editToolId=id;
+
+            const titleEl = document.getElementById('toolModalTitle');
+            if(titleEl) titleEl.textContent = 'Editar ferramenta';
+
+            $('#toolName').value=t.name;
+            $('#toolCode').value=t.code;
+            $('#toolNotes').value=t.notes||'';
+            const prevEl = $('#toolPreview');
+            if(prevEl){
+                prevEl.src = '';
+                prevEl.classList.add('d-none');
+                const pid = t.photoId || '';
+                if(pid){
+                    PhotoStore.getUrl(pid).then(url=>{
+                        if(!url) return;
+                        // garante que ainda estamos editando o mesmo item
+                        if(editToolId !== id) return;
+                        prevEl.src = url;
+                        prevEl.classList.remove('d-none');
+                    }).catch(()=>{});
+                } else if(t.photo){
+                    prevEl.src = t.photo;
+                    prevEl.classList.remove('d-none');
+                }
+            }
+
+            const delBtn = $('#btnDeleteTool');
+            if(delBtn) delBtn.classList.remove('d-none');
+
+            const reactBtn = $('#btnReactivateTool');
+            if(reactBtn){
+                if(t.status==='unavailable') reactBtn.classList.remove('d-none');
+                else reactBtn.classList.add('d-none');
+            }
+
+            modalById('modalTool')?.show();
+        };
+
+        $('#btnNewTool').onclick = () => {
+            editToolId=null;
+
+            const titleEl = document.getElementById('toolModalTitle');
+            if(titleEl) titleEl.textContent = 'Nova ferramenta';
+
+            const delBtn = $('#btnDeleteTool'); if(delBtn) delBtn.classList.add('d-none');
+            const reactBtn = $('#btnReactivateTool'); if(reactBtn) reactBtn.classList.add('d-none');
+
+            $('#toolName').value='';
+            $('#toolCode').value='';
+            $('#toolNotes').value='';
+            $('#toolPhoto').value='';
+            $('#toolPreview').classList.add('d-none');
+        };
+
+    $('#toolPhoto').onchange = async (e) => {
+        if(e.target.files[0]) {
+            try {
+                const b64 = await compressImage(e.target.files[0], 800, 0.7);
+                $('#toolPreview').src=b64;
+                $('#toolPreview').classList.remove('d-none');
+            } catch(e){}
+        }
+    };
+
+    $('#btnSaveTool').onclick = async () => {
+        if(!isAdmin(session.user)) return;
+
+        const name = ($('#toolName').value || '').trim();
+        const code = ($('#toolCode').value || '').trim();
+        const notes = ($('#toolNotes').value || '').trim();
+        if(!name || !code) return alert('Nome e Código obrigatórios');
+
+        const tools = DB.tools();
+
+        // Edição
+        if(editToolId){
+            const t = tools.find(x=>x.id===editToolId);
+            if(!t) return;
+
+            // evita duplicidade de código (case-insensitive)
+            if(tools.some(x => x.id !== t.id && String(x.code||'').trim().toUpperCase() === code.toUpperCase())){
+                return alert('Código já existe');
+            }
+
+            t.name = name;
+            t.code = code;
+            t.notes = notes;
+
+            const fileIn = $('#toolPhoto');
+            if(fileIn.files && fileIn.files[0]){
+                try{
+                    const b64 = await compressImage(fileIn.files[0], 800, 0.7);
+                    const pid = t.photoId || `tool_${t.id}`;
+                    await PhotoStore.putDataUrl(pid, b64, { ts: Date.now() });
+                    t.photoId = pid;
+                    t.photo = ''; // limpa legado
+                } catch(e){
+                    return alert('Erro na imagem');
+                }
+            }
+        } else {
+            // Novo
+            if(tools.some(x => String(x.code||'').trim().toUpperCase() === code.toUpperCase())){
+                return alert('Código já existe');
+            }
+
+            const id = uid();
+            const tool = { id, name, code, notes, status:'available', photoId:'', photo:'' };
+
+            const fileIn = $('#toolPhoto');
+            let b64 = '';
+            if(fileIn.files && fileIn.files[0]){
+                try { b64 = await compressImage(fileIn.files[0], 800, 0.7); } catch(e){ return alert('Erro na imagem'); }
+            } else {
+                const prev = ($('#toolPreview')?.src || '').trim();
+                if(prev.startsWith('data:image/')) b64 = prev;
+            }
+
+            if(b64){
+                try{
+                    const pid = `tool_${id}`;
+                    await PhotoStore.putDataUrl(pid, b64, { ts: Date.now() });
+                    tool.photoId = pid;
+                } catch(e){ console.warn('save tool photo failed', e); }
+            }
+
+            tools.push(tool);
+        }
+
+        try { if(!ls.set('fi_tools', tools)) return; } catch(e){ return alert('Não foi possível salvar os dados.'); }
+
+        bootstrap.Modal.getInstance(document.getElementById('modalTool'))?.hide();
+        $('#toolPhoto').value = '';
+        renderTools(); renderQR();
+    };
+
+$('#btnReactivateTool').onclick = () => {
+    if(!isAdmin(session.user)) return;
+    if(!editToolId) return;
+    window.reactivateTool(editToolId);
+};
+
+    $('#btnDeleteTool').onclick = () => {
+        if(!isAdmin(session.user)) return;
+        if(!editToolId) return;
+
+        const tools = DB.tools();
+        const idx = tools.findIndex(x=>x.id===editToolId);
+        if(idx < 0) return;
+
+        const t = tools[idx];
+        if(t.status === 'loaned') return alert('Não é possível excluir uma ferramenta emprestada. Faça a devolução antes.');
+
+        if(!confirm(`Excluir "${t.name}" (${t.code})? Esta ação não pode ser desfeita.`)) return;
+
+        tools.splice(idx, 1);
+        if(!ls.set('fi_tools', tools)) return;
+        log('tool_delete', { toolId:t.id, name:t.name, code:t.code });
+
+        editToolId = null;
+        const delBtn = $('#btnDeleteTool'); if(delBtn) delBtn.classList.add('d-none');
+        modalById('modalTool')?.hide();
+        renderTools();
+    };
+    // --- 7. LOANS LOGIC ---
+    function doLoan(t){
+        const tools=DB.tools();
+        const tx=tools.find(x=>x.id===t.id);
+        if(!tx) return;
+        if(tx.status!=='available') return alert('Ferramenta indisponível para empréstimo.');
+        tx.status='loaned';
+        tx.holder=session.user.id;
+
+        const loans=DB.loans();
+        loans.unshift({ id:uid(), toolId:t.id, toolName:t.name, toolCode:t.code, userId:session.user.id, userName:session.user.name, loanedAt:nowIso(), dueAt:new Date(Date.now()+48*36e5).toISOString() });
+        if(!ls.set('fi_tools', tools)) return;
+        if(!ls.set('fi_loans', loans)) return;
+        log('emprestimo', {code:t.code, user:session.user.email});
+        renderAll();
+    }
+
+    function doReturn(t){
+        const tools=DB.tools();
+        const tx=tools.find(x=>x.id===t.id);
+        const loans=DB.loans();
+        const l=loans.find(x=>x.toolId===t.id && !x.returnedAt);
+        const cond = l?.returnCondition || 'clean';
+        if(tx){
+            tx.status = (cond==='damaged') ? 'unavailable' : 'available';
+            tx.holder = null;
+        }
+        if(l) { l.returnedAt=nowIso(); }
+        if(!ls.set('fi_tools', tools)) return;
+        if(!ls.set('fi_loans', loans)) return;
+        const note = l?.returnNote || '';
+        const photosCount = (l?.returnPhotos && l.returnPhotos.length) ? l.returnPhotos.length : 0;
+        log('devolucao', {code:t.code, cond, note, photos: photosCount});
+        if(cond==='damaged') log('tool_indisponivel', {code:t.code, toolId:t.id});
+        renderAll();
+    }
+
+    function renderLoans(){
+        const l=$('#loansList'); l.innerHTML='';
+                DB.loans().filter(x=>!x.returnedAt).forEach(x=>{
+           const overdue = new Date(x.dueAt) < new Date();
+           const toolName = esc(x.toolName);
+           const userName = esc(x.userName);
+           l.innerHTML += `<div class="list-group-item d-flex justify-content-between">
+           <div><b>${toolName}</b><br><small>${userName}</small></div>
+           <span class="badge ${overdue?'bg-danger':'bg-secondary'}">${overdue?'Atrasado':'No prazo'}</span></div>`;
+        });
+    }
+
+    // --- 8. RETURN MODAL (COMPRESS PHOTO) ---
+        function showReturnModal(tool, onConfirm){
+            const m = modalById('returnConditionModal');
+            $('#returnToolInfo').textContent = `${tool.name} (${tool.code||'-'})`;
+            $('#returnConditionSelect').value = 'clean';
+            $('#returnDescription').value = '';
+            $('#returnPhotoInput').value = '';
+            $('#returnPhotoPreview').style.display='none';
+            $('#returnPhotoImg').src = '';
+            let photoB64 = '';
+
+            const btn = $('#confirmReturnBtn');
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            function setUi(cond){
+                const showExtra = (cond !== 'clean');
+                const descWrap = document.getElementById('returnDescWrapper');
+                const photoSec = document.getElementById('returnPhotoSection');
+                if(descWrap) descWrap.style.display = showExtra ? 'block' : 'none';
+                if(photoSec) photoSec.style.display = showExtra ? 'block' : 'none';
+
+                const descLabel = document.getElementById('returnDescLabel');
+                const descHelp  = document.getElementById('returnDescHelp');
+                const photoLabel = document.getElementById('returnPhotoLabel');
+                const photoHelp  = document.getElementById('returnPhotoHelp');
+
+                if(cond === 'dirty'){
+                    if(descLabel) descLabel.textContent = 'Motivo / Observação';
+                    if(descHelp) descHelp.textContent = 'Ex.: devolvida suja, precisa de limpeza.';
+                    if(photoLabel) photoLabel.textContent = 'Foto (opcional)';
+                    if(photoHelp) photoHelp.textContent = 'Se possível, tire uma foto para registro.';
+                } else if(cond === 'damaged'){
+                    if(descLabel) descLabel.textContent = 'Motivo da avaria';
+                    if(descHelp) descHelp.textContent = 'Descreva o dano e o que aconteceu.';
+                    if(photoLabel) photoLabel.textContent = 'Foto da avaria (obrigatória)';
+                    if(photoHelp) photoHelp.textContent = 'Tire uma foto mostrando claramente o dano.';
+                } else {
+                    if(descLabel) descLabel.textContent = 'Descrição';
+                    if(descHelp) descHelp.textContent = '';
+                    if(photoLabel) photoLabel.textContent = 'Foto de Registro';
+                    if(photoHelp) photoHelp.textContent = '';
+                }
+
+                // limpa preview ao trocar para "clean"
+                if(!showExtra){
+                    $('#returnDescription').value = '';
+                    $('#returnPhotoInput').value = '';
+                    $('#returnPhotoPreview').style.display='none';
+                    $('#returnPhotoImg').src = '';
+                    photoB64 = '';
+                }
+            }
+
+            setUi('clean');
+
+            $('#returnConditionSelect').onchange = (e) => setUi(e.target.value);
+
+            $('#returnPhotoInput').onchange = async (e) => {
+                 if(e.target.files[0]){
+                     try {
+                         photoB64 = await compressImage(e.target.files[0], 640, 0.6);
+                         $('#returnPhotoImg').src = photoB64;
+                         $('#returnPhotoPreview').style.display = 'block';
+                     } catch(err){ alert('Erro na foto'); }
+                 }
+            };
+
+            newBtn.onclick = async () => {
+                 try {
+                 const cond = $('#returnConditionSelect').value;
+                 const desc = ($('#returnDescription').value || '').trim();
+
+                 if(cond !== 'clean' && !desc) return alert('Motivo/descrição obrigatório para itens sujos/danificados.');
+                 if(cond === 'damaged' && !photoB64) return alert('Para item DANIFICADO, a foto da avaria é obrigatória.');
+
+                 const loans = DB.loans();
+                 const loan = loans.find(l => l.toolId === tool.id && !l.returnedAt);
+
+                 const photos = [];
+                 if(photoB64){
+                     const ts = Date.now();
+                     const base = loan ? `loan_${loan.id}` : `loan_${tool.id}`;
+                     const pid = `${base}_${ts}`;
+                     try{
+                         await PhotoStore.putDataUrl(pid, photoB64, { ts });
+                         photos.push({ ts, id: pid });
+                     } catch(err){
+                         console.warn('Erro ao salvar foto (IndexedDB)', err);
+                     }
+                 }
+
+                 if(loan){
+                     loan.returnCondition = cond;
+                     loan.returnNote = desc;
+
+                     if(photos.length) loan.returnPhotos = photos;
+
+                     // registro estruturado p/ auditoria
+                     if(cond === 'damaged'){
+                         loan.damage = { reportedAt: nowIso(), reportedBy: session.user?.email || '-', reason: desc, photosCount: photos.length };
+                     } else if(cond === 'dirty'){
+                         loan.issue = { reportedAt: nowIso(), reportedBy: session.user?.email || '-', note: desc, photosCount: photos.length };
+                     }
+
+                     if(!ls.set('fi_loans', loans)) return;
+                 }
+
+                 // também registra no cadastro da ferramenta (histórico de avarias)
+                 if(cond === 'damaged'){
+                     const tools = DB.tools();
+                     const tx = tools.find(x=>x.id===tool.id);
+                     if(tx){
+                         const entry = { ts: nowIso(), by: session.user?.email || '-', byName: session.user?.name || '-', reason: desc, photosCount: photos.length, loanId: loan?.id };
+                         tx.damageHistory = Array.isArray(tx.damageHistory) ? tx.damageHistory : [];
+                         tx.damageHistory.unshift(entry);
+                         tx.lastDamage = entry;
+                         if(!ls.set('fi_tools', tools)) return;
+                     }
+                 }
+
+                 m?.hide();
+                 if(onConfirm) onConfirm();
+                 } catch(err){
+                     console.error(err);
+                     alert('Erro ao confirmar a devolução. Se você marcou como DANIFICADA e adicionou foto, pode ser limite de armazenamento do navegador.\n\nTente uma foto menor ou limpe os dados deste site no navegador (armazenamento do site).');
+                 }
+            };
+
+            m?.show();
+        }
+
+    function showConfirmLoan(tool, onConfirm){
+        const m = modalById('confirmLoanModal');
+        $('#confirmLoanText').textContent = `Confirma o empréstimo de ${tool.name}?`;
+
+        const btn = $('#confirmLoanBtn');
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        // trava para evitar duplo clique (principalmente em mobile)
+        newBtn.disabled = false;
+        newBtn.dataset.locked = '0';
+        newBtn.removeAttribute('aria-busy');
+
+        newBtn.onclick = () => {
+            if(newBtn.dataset.locked === '1') return;
+            newBtn.dataset.locked = '1';
+            newBtn.disabled = true;
+            newBtn.setAttribute('aria-busy','true');
+
+            // Fecha o modal primeiro para não dar tempo de clicar de novo
+            m?.hide();
+
+            // Deixa o Bootstrap iniciar a animação de hide antes de atualizar estado/UI
+            setTimeout(() => {
+                if(onConfirm) onConfirm();
+            }, 50);
+        };
+
+        // Se cancelar/fechar, garante que o botão não fica travado
+        const modalEl = document.getElementById('confirmLoanModal');
+        if(modalEl){
+            modalEl.addEventListener('hidden.bs.modal', () => {
+                const b = document.getElementById('confirmLoanBtn');
+                if(b){ b.dataset.locked = '0'; b.disabled = false; b.removeAttribute('aria-busy'); }
+            }, { once:true });
+        }
+
+        m?.show();
+    }
+
+    // --- 9. SMART BACKUP ---
+    const BACKUP_KEY = 'fi_last_backup_ts';
+    function updateBackupUI() {
+        if(!isAdmin(session.user)) return;
+        const lastTs = localStorage.getItem(BACKUP_KEY);
+        const card = $('#backupCard');
+        if(!lastTs) {
+            $('#backupStatusText').innerHTML = '<span class="text-danger">⚠️ Nunca realizado.</span>';
+            $('#backupAlert').classList.remove('d-none');
+            $('#daysSinceBackup').textContent = 'muitos';
+        } else {
+            const days = Math.floor((Date.now() - parseInt(lastTs)) / (864e5));
+            if(days>=7){
+                card.className = 'card p-3 border-danger';
+                $('#backupStatusText').innerHTML = `<span class="text-danger">⚠️ Há ${days} dias.</span>`;
+                $('#backupAlert').classList.remove('d-none');
+                $('#daysSinceBackup').textContent = days;
+            } else {
+                card.className = 'card p-3 border-success';
+                $('#backupStatusText').innerHTML = `<span class="text-success">✅ Seguro. (Há ${days} dias)</span>`;
+                $('#backupAlert').classList.add('d-none');
+            }
+        }
+    }
+
+    $('#btnSmartBackup').onclick = async () => {
+        const data = {
+            meta: { v: '2.1', at: nowIso(), photos: 'indexeddb' },
+            users: DB.users(),
+            tools: DB.tools(),
+            loans: DB.loans(),
+            logs: DB.logs(),
+            settings: DB.settings(),
+            brand: DB.brand()
+        };
+
+        // inclui fotos (IndexedDB) dentro do backup (como DataURL)
+        try{
+            const ids = new Set();
+            (data.tools || []).forEach(t => { if(t?.photoId) ids.add(t.photoId); });
+            (data.loans || []).forEach(l => {
+                (l?.returnPhotos || []).forEach(p => {
+                    if(p && typeof p === 'object' && p.id) ids.add(p.id);
+                });
+            });
+            data.photos = await PhotoStore.exportAsDataUrlMap([...ids]);
+        } catch(e){
+            console.warn('Backup: falha ao exportar fotos', e);
+            data.photos = {};
+        }
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = `backup_vale_${nowIso().slice(0,10)}.json`;
+        a.click();
+        setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 2000);
+
+        localStorage.setItem(BACKUP_KEY, Date.now());
+        updateBackupUI();
+    };
+
+    $('#importJsonSmart').onchange = (e) => {
+        if(!confirm('Substituir todos os dados?')) return;
+        const r = new FileReader();
+        r.onload = async () => {
+            try {
+                const o = JSON.parse(r.result);
+
+                if(o.users) ls.set('fi_users', o.users);
+                if(o.tools) ls.set('fi_tools', o.tools);
+                if(o.loans) ls.set('fi_loans', o.loans);
+                if(o.settings) ls.set('fi_settings', o.settings);
+                if(o.brand) ls.set('fi_brand', o.brand);
+
+                // restaura fotos (se existirem no backup)
+                try{
+                    await PhotoStore.clearAll();
+                    await PhotoStore.importFromDataUrlMap(o.photos);
+                    await migratePhotosToIDB(); // caso backup antigo tenha base64
+                } catch(err){
+                    console.warn('Restore photos failed', err);
+                }
+
+                alert('Restaurado!');
+                location.reload();
+            } catch(e){ alert('Arquivo inválido'); }
+        };
+        r.readAsText(e.target.files[0]);
+    };
+
+    // --- 10. DASHBOARD ---
+    function _parseDateInput(v, endOfDay=false){
+        if(!v) return null;
+        const d = new Date(v + 'T00:00:00');
+        if(endOfDay) d.setHours(23,59,59,999);
+        return d;
+    }
+    function _getDashRange(){
+        const s = document.getElementById('dashStartDate')?.value || '';
+        const e = document.getElementById('dashEndDate')?.value || '';
+        return { start: _parseDateInput(s, false), end: _parseDateInput(e, true) };
+    }
+    function _inRange(iso, range){
+        if(!iso) return false;
+        const d = new Date(iso);
+        if(range?.start && d < range.start) return false;
+        if(range?.end && d > range.end) return false;
+        return true;
+    }
+    function _fmtBR(iso){
+        if(!iso) return '-';
+        const d = new Date(iso);
+        return d.toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' });
+    }
+    function _toYMD(d){
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function renderDashboard(){
+        if(!document.getElementById('dashboardLoansChart')) return;
+
+        const tools = DB.tools();
+        const loansAll = DB.loans();
+        const range = _getDashRange();
+
+        // KPIs
+        const countLoaned = tools.filter(t=>t.status==='loaned').length;
+        const countAvailable = tools.filter(t=>t.status==='available').length;
+        const countUnavailable = tools.filter(t=>t.status==='unavailable').length;
+        const problemsAll = loansAll.filter(l=>l.returnCondition && l.returnCondition!=='clean');
+        const problemsFiltered = (!range.start && !range.end)
+            ? problemsAll
+            : problemsAll.filter(l => _inRange(l.returnedAt || l.loanedAt, range));
+
+        document.getElementById('kpTotal').textContent = tools.length;
+        document.getElementById('kpLoaned').textContent = countLoaned;
+        document.getElementById('kpAvailable').textContent = countAvailable;
+        const overdueCount = loansAll.filter(l=>!l.returnedAt && l.dueAt && new Date(l.dueAt) < new Date()).length;
+        const elUn = document.getElementById('kpUnavailable'); if(elUn) elUn.textContent = countUnavailable;
+        const elOv = document.getElementById('kpOverdue'); if(elOv) elOv.textContent = overdueCount;
+        document.getElementById('kpProblems').textContent = problemsFiltered.length;
+
+        // carimbo de atualização
+        const upd = document.getElementById('dashboardUpdatedAt');
+        if(upd) upd.textContent = 'Atualizado ' + new Date().toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' });
+
+        // Meus empréstimos (para quem estiver logado)
+        const myList = document.getElementById('myLoansList');
+        const myEmpty = document.getElementById('myLoansEmpty');
+        const myCount = document.getElementById('myLoansCount');
+        if(myList && session.user){
+            const open = loansAll.filter(l=>!l.returnedAt && l.userId===session.user.id);
+            if(myCount) myCount.textContent = open.length;
+            myList.innerHTML = '';
+            if(open.length===0){
+                if(myEmpty) myEmpty.style.display = 'block';
+            } else {
+                if(myEmpty) myEmpty.style.display = 'none';
+                open.forEach(l=>{
+                    const overdue = l.dueAt && (new Date(l.dueAt) < new Date());
+                    myList.innerHTML += `<div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="me-2">
+                          <div class="fw-semibold">${l.toolName||'Ferramenta'}</div>
+                          <div class="text-muted small">Devolver até: ${fmtDT(l.dueAt)}</div>
+                        </div>
+                        <span class="badge ${overdue?'bg-danger':'bg-secondary'}">${overdue?'Atrasado':'No prazo'}</span>
+                    </div>`;
+                });
+            }
+        }
+
+        // Range-filtered loans (by loan date)
+        const loansInRange = (!range.start && !range.end)
+            ? loansAll
+            : loansAll.filter(l => _inRange(l.loanedAt, range));
+
+        // 1) Empréstimos por dia (linha)
+        const byDay = {};
+        loansInRange.forEach(l=>{
+            const d = (l.loanedAt || '').slice(0,10);
+            if(!d) return;
+            byDay[d] = (byDay[d] || 0) + 1;
+        });
+        const labels = Object.keys(byDay).sort();
+        const values = labels.map(k => byDay[k]);
+
+        if(window.dashChart) window.dashChart.destroy();
+        window.dashChart = new Chart(document.getElementById('dashboardLoansChart'), {
+            type:'line',
+            data:{ labels, datasets:[{ label:'Empréstimos', data:values, tension:0.3 }] },
+            options:{ maintainAspectRatio:false }
+        });
+
+        // 2) Status das ferramentas (pizza)
+        if(window.dashStatusPie) window.dashStatusPie.destroy();
+        window.dashStatusPie = new Chart(document.getElementById('dashboardStatusPie'), {
+            type:'pie',
+            data:{
+                labels:['Disponível','Emprestada','Indisponível'],
+                datasets:[{ data:[countAvailable, countLoaned, countUnavailable] }]
+            },
+            options:{ maintainAspectRatio:false }
+        });
+
+        // 3) Top usuários (barras)
+        const byUser = {};
+        loansInRange.forEach(l=>{
+            const name = l.userName || '—';
+            byUser[name] = (byUser[name] || 0) + 1;
+        });
+        const top = Object.entries(byUser)
+            .sort((a,b)=>b[1]-a[1])
+            .slice(0,8);
+
+        if(window.dashTopUsers) window.dashTopUsers.destroy();
+        window.dashTopUsers = new Chart(document.getElementById('dashboardTopUsersBar'), {
+            type:'bar',
+            data:{
+                labels: top.map(x=>x[0]),
+                datasets:[{ label:'Empréstimos', data: top.map(x=>x[1]) }]
+            },
+            options:{ maintainAspectRatio:false }
+        });
+
+        // 4) Lista: últimas devoluções com problema
+        const problemsListEl = document.getElementById('dashboardProblemsList');
+        if(problemsListEl){
+            const condLabel = (c)=> c==='dirty' ? 'Suja' : (c==='damaged' ? 'Danificada' : 'Ok');
+            const items = problemsFiltered
+                .filter(l => l.returnedAt) // devolvidas
+                .sort((a,b)=> new Date(b.returnedAt) - new Date(a.returnedAt))
+                .slice(0,6);
+
+            if(items.length === 0){
+                problemsListEl.innerHTML = `<div class="text-muted small">Nenhuma devolução com problema no período.</div>`;
+            } else {
+                problemsListEl.innerHTML = `<div class="list-group">${
+                    items.map(l=>`
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between gap-2">
+                                <div class="fw-semibold">${l.toolName || 'Ferramenta'} <span class="text-muted small">(${l.toolCode || '-'})</span></div>
+                                <span class="badge ${l.returnCondition==='damaged'?'bg-danger':(l.returnCondition==='dirty'?'bg-warning text-dark':'bg-secondary')}">${condLabel(l.returnCondition)}</span>
+                            </div>
+                            <div class="small text-muted">Usuário: <b>${l.userName || '-'}</b> • ${_fmtBR(l.returnedAt)}</div>
+                            ${l.returnNote ? `<div class="small mt-1">${l.returnNote}</div>` : ``}
+                            ${l.returnPhotos?.length ? `<div class="small text-muted mt-1">📷 ${l.returnPhotos.length} foto(s)</div>` : ``}
+                        </div>
+                    `).join('')
+                }</div>`;
+            }
+        }
+
+        // 5) Galeria (fotos de devoluções com problema) + filtros
+        const userSel = document.getElementById('galleryUserSelect');
+        if(userSel){
+            const prev = userSel.value;
+            userSel.innerHTML = `<option value="">Todos</option>` + DB.users()
+                .map(u=>`<option value="${u.id}">${u.name}</option>`)
+                .join('');
+            userSel.value = prev || '';
+        }
+
+        const gUser = document.getElementById('galleryUserSelect')?.value || '';
+        const gStart = _parseDateInput(document.getElementById('galleryStartDate')?.value || '', false);
+        const gEnd = _parseDateInput(document.getElementById('galleryEndDate')?.value || '', true);
+        const gRange = { start:gStart, end:gEnd };
+
+        const gal = document.getElementById('dashboardPhotoGallery');
+        if(gal){
+            gal.innerHTML = '';
+            const photosLoans = loansAll
+                .filter(l => l.returnPhotos?.length)
+                .filter(l => l.returnCondition && l.returnCondition!=='clean'); // só problemas
+            const filtered = photosLoans.filter(l=>{
+                if(gUser && l.userId != gUser) return false;
+                const iso = l.returnedAt || l.loanedAt;
+                if((gRange.start || gRange.end) && !_inRange(iso, gRange)) return false;
+                return true;
+            });
+
+            if(filtered.length === 0){
+                gal.innerHTML = `<div class="text-muted small">Sem fotos para os filtros selecionados.</div>`;
+            } else {
+                filtered.forEach(l=>{
+                    l.returnPhotos.forEach(p=>{
+                        const div = document.createElement('div');
+                        div.style.cursor = 'pointer';
+                        div.style.width = '100px';
+                        div.style.height = '80px';
+                        div.style.borderRadius = '6px';
+                        div.style.border = '1px solid #ccc';
+                        div.title = `${l.toolName || ''} • ${l.userName || ''}`;
+
+                        const pid = (p && typeof p === 'object') ? (p.id || '') : '';
+                        const legacy = (p && typeof p === 'object') ? (p.data || '') : (typeof p === 'string' ? p : '');
+                        const ts = (p && typeof p === 'object' && p.ts) ? p.ts : Date.now();
+
+                        // thumbnail
+                        div.style.background = 'linear-gradient(135deg, #e5e7eb, #f3f4f6)';
+                        if(pid){
+                            PhotoStore.getUrl(pid).then(url=>{
+                                if(url) div.style.background = `url(${url}) center/cover border-box`;
+                            }).catch(()=>{});
+                        } else if(legacy && String(legacy).startsWith('data:image/')){
+                            div.style.background = `url(${legacy}) center/cover border-box`;
+                        }
+
+                        div.onclick = async () => {
+                            let url = '';
+                            try{
+                                url = pid ? await PhotoStore.getUrl(pid) : safeImgSrc(legacy);
+                            } catch(e){
+                                url = safeImgSrc(legacy);
+                            }
+                            document.getElementById('photoViewImg').src = url || '';
+                            const dl = document.getElementById('photoDownloadLink');
+                            if(dl){
+                                dl.href = url || '';
+                                dl.download = `foto_${(l.toolCode||'tool')}_${ts}.jpg`;
+                            }
+                            bootstrap.Modal.getOrCreateInstance(document.getElementById('photoViewModal')).show();
+                        };
+                        gal.appendChild(div);
+                    });
+                });
+            }
+        }
+    }
+
+    // Controles do Dashboard
+    document.getElementById('btnRefreshDashboard')?.addEventListener('click', renderDashboard);
+
+    document.getElementById('btnLast7')?.addEventListener('click', () => {
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - 6);
+        document.getElementById('dashStartDate').value = _toYMD(start);
+        document.getElementById('dashEndDate').value = _toYMD(end);
+        renderDashboard();
+    });
+    document.getElementById('btnLast30')?.addEventListener('click', () => {
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - 29);
+        document.getElementById('dashStartDate').value = _toYMD(start);
+        document.getElementById('dashEndDate').value = _toYMD(end);
+        renderDashboard();
+    });
+    document.getElementById('btnClearRange')?.addEventListener('click', () => {
+        document.getElementById('dashStartDate').value = '';
+        document.getElementById('dashEndDate').value = '';
+        renderDashboard();
+    });
+
+    document.getElementById('btnApplyGalleryFilter')?.addEventListener('click', renderDashboard);
+    document.getElementById('btnClearGalleryFilter')?.addEventListener('click', () => {
+        document.getElementById('galleryUserSelect').value = '';
+        document.getElementById('galleryStartDate').value = '';
+        document.getElementById('galleryEndDate').value = '';
+        renderDashboard();
+    });
+
+    document.getElementById('btnExportProblemsCsv')?.addEventListener('click', () => {
+        const loansAll = DB.loans();
+        const range = _getDashRange();
+        const problems = loansAll
+            .filter(l=>l.returnCondition && l.returnCondition!=='clean')
+            .filter(l => (!range.start && !range.end) ? true : _inRange(l.returnedAt || l.loanedAt, range))
+            .sort((a,b)=> new Date(b.returnedAt || b.loanedAt) - new Date(a.returnedAt || a.loanedAt));
+
+        const rows = [
+            ['toolCode','toolName','userName','loanedAt','returnedAt','condition','note','photos'],
+            ...problems.map(l=>[
+                l.toolCode||'',
+                l.toolName||'',
+                l.userName||'',
+                l.loanedAt||'',
+                l.returnedAt||'',
+                l.returnCondition||'',
+                (l.returnNote||'').replace(/\r?\n/g,' ').replace(/"/g,'""'),
+                String(l.returnPhotos?.length||0)
+            ])
+        ];
+        const csv = rows.map(r=>r.map(v=> `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `problemas_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+
+    // --- 11. ADMIN USERS & BRAND ---
+    function renderUsers(){
+        const ul=$('#usersList'); ul.innerHTML='';
+        DB.users().forEach(u=>{
+            ul.innerHTML+=`<div class="list-group-item d-flex justify-content-between"><span>${u.name} (${u.email})</span>${u.email!==ADMIN_EMAIL?`<button class="btn btn-sm btn-outline-danger" onclick="delUser('${u.id}')">Excluir</button>`:''}</div>`;
+        });
+    }
+
+    window.delUser = (id) => {
+        const us=DB.users().filter(u=>u.id!==id);
+        ls.set('fi_users', us);
+        renderUsers();
+    };
+
+    $('#btnNewUser').onclick = ()=> modalById('modalUser')?.show();
+
+    $('#btnSaveUser').onclick = ()=> {
+        const name=$('#usrName').value, email=$('#usrEmail').value, pass=$('#usrPass').value;
+        const us=DB.users();
+        us.push({ id:uid(), name, email, password:pass, role:'user' });
+        ls.set('fi_users', us);
+        bootstrap.Modal.getInstance(document.getElementById('modalUser'))?.hide();
+        renderUsers();
+    };
+
+    function renderQR(){
+        const b=$('#qrArea'); b.innerHTML='';
+        DB.tools().forEach(t=>{
+            const d=document.createElement('div'); d.className='qr-print';
+            d.innerHTML=`<div id="q_${t.id}"></div><small>${t.name}</small><br><small>${t.code}</small>`;
+            b.appendChild(d);
+            new QRCode(document.getElementById(`q_${t.id}`), {text:t.code, width:96, height:96});
+        });
+    }
+    $('#btnRenderQRCodes').onclick = renderQR;
+
+    $('#btnSaveSettings').onclick = () => {
+        const b = DB.brand();
+        b.logo=$('#cfgLogo').value; b.title=$('#cfgBrandTitle').value; b.tag=$('#cfgTag').value;
+        ls.set('fi_brand', b);
+        ls.set('fi_settings', {webhook:$('#cfgWebhook').value});
+        applyBrand();
+        alert('Salvo!');
+    };
+
+    $('#cfgLogoFile').onchange = (e) => {
+        const r=new FileReader();
+        r.onload=()=>{
+            $('#cfgLogo').value=r.result;
+            $('#cfgLogoPreview').src=r.result;
+            $('#cfgLogoPreview').style.display='block';
+        };
+        if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
+    };
+
+    function applyBrand(){
+        const b=DB.brand();
+        if(b.logo) $('#valeLogo').src=b.logo;
+        $('#brandTitle').textContent=b.title;
+        $('#siteTag').textContent=b.tag;
+        $('#cfgLogo').value=b.logo||'';
+        $('#cfgBrandTitle').value=b.title;
+        $('#cfgTag').value=b.tag;
+        $('#cfgWebhook').value=DB.settings().webhook||'';
+    }
+
+    function renderLog(){
+        const ll = document.getElementById('logList');
+        if(!ll) return;
+        ll.innerHTML = '';
+        DB.logs().forEach(x=>{
+            ll.innerHTML += `<div class="list-group-item"><div class="small text-muted">${x.ts} • ${x.user}</div><div><b>${x.event}</b> <span class="text-muted small">${JSON.stringify(x.data||{})}</span></div></div>`;
+        });
+    }
+
+    function renderAll(){ renderTools(); renderLoans(); renderUsers(); renderLog(); renderDashboard(); applyBrand(); }
+
+
+    function showTab(target){
+        const btn = document.querySelector(`button[data-bs-target="${target}"]`);
+        if(!btn) return;
+        bootstrap.Tab.getOrCreateInstance(btn).show();
+    }
+
+    function setupDashboardUX(){
+        // KPIs clicáveis
+        document.querySelectorAll('.kpi-card[data-kpi]').forEach(card=>{
+            card.addEventListener('click', ()=>{
+                const k = card.getAttribute('data-kpi');
+                if(k==='problems'){
+                    showTab('#tabDashboard');
+                    setTimeout(()=>{ document.getElementById('dashboardProblemsList')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
+                    return;
+                }
+                if(k==='overdue'){
+                    showTab('#tabFerramentas');
+                    $('#filterStatus').value = 'loaned';
+                    if($('#filterOverdue')) $('#filterOverdue').value = 'overdue';
+                    renderTools();
+                    return;
+                }
+                // all / available / loaned / unavailable
+                showTab('#tabFerramentas');
+                $('#filterStatus').value = (k==='all') ? 'all' : k;
+                if($('#filterOverdue')) $('#filterOverdue').value = 'all';
+                renderTools();
+            });
+        });
+
+        // Atalhos
+        document.getElementById('dashQuickScanner')?.addEventListener('click', ()=> showTab('#tabScanner'));
+        document.getElementById('dashQuickTools')?.addEventListener('click', ()=> showTab('#tabFerramentas'));
+        document.getElementById('dashQuickLog')?.addEventListener('click', ()=> showTab('#tabLog'));
+    }
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(b => {
+        b.addEventListener('shown.bs.tab', (e) => {
+             if(e.target.dataset.bsTarget === '#tabScanner') window.startScanner();
+             else window.stopScanner();
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', async ()=> {
+        applyBrand();
+        await migratePhotosToIDB();
+        renderAll();
+        document.getElementById('year').textContent = new Date().getFullYear();
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+</script>
+</body>
+</html>
